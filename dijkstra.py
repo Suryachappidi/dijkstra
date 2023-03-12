@@ -1,5 +1,9 @@
 import numpy as np
 
+# Dimensions of the map
+width = 600
+height = 250
+
 # return change in x , y and returns cost
 
 def Actionmove_right():
@@ -32,8 +36,8 @@ def compute_neighbours(map, node):
     width, height = map.shape
     x, y = node[1], node[0]
     neighbours = []
-    for dx, dy, cost in [Actionmove_right(), Actionmove_left(), Actionmove_up(), Actionmove_down(), Actionmove_upright(),
-                         Actionmove_upleft(), Actionmove_downright(), Actionmove_downleft()]:
+    for dx, dy, cost in [Actionmove_right(), Actionmove_left(), Actionmove_up(), Actionmove_down(),
+                         Actionmove_upright(), Actionmove_upleft(), Actionmove_downright(), Actionmove_downleft()]:
         new_x, new_y = x + dx, y + dy
         if 0 <= new_x < height and 0 <= new_y < width and map[new_y, new_x] == 0:
             neighbours.append((new_y, new_x))
@@ -112,3 +116,33 @@ def ObstacleMap(width, height):
     map[:height, width - 5:width] = 1
 
     return map
+
+def is_valid(x, y, obstacle_map):
+    return (0 <= x < obstacle_map.shape[1] and
+            0 <= y < obstacle_map.shape[0] and
+            obstacle_map[y][x] not in [1, 2])
+
+
+# Creating the Obstacle map
+obstacle_map = ObstacleMap(width, height)
+
+# Taking valid Goal and Start Nodes
+start_coord = input("Enter start coordinates as x,y: ")
+start_x, start_y = start_coord.split(',')
+start_x = int(start_x)
+start_y = int(start_y)
+if is_valid(start_x, start_y, obstacle_map):
+    start = (start_y, start_x)
+else:
+    print("Invalid start node or Node is in Obstacle space")
+    exit(-1)
+
+goal_coordinates = input("Enter goal coordinates as x,y: ")
+goal_x, goal_y = goal_coordinates.split(',')
+goal_x = int(goal_x)
+goal_y = int(goal_y)
+if not is_valid(goal_x, goal_y, obstacle_map):
+    goal = (goal_y, goal_x)
+else:
+    print("Invalid goal node or Node is in Obstacle space")
+    exit(-1)
