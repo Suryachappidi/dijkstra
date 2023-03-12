@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import heapq
 from matplotlib.animation import FuncAnimation
+import signal
 
 # Dimensions of the map
 width = 600
 height = 250
 
-# return change in x , y and returns cost
-
+# returns change in x , y and returns cost
 def Actionmove_right():
     return 1, 0, 1
 
@@ -155,7 +155,7 @@ def dijkstra(map, start, goal, k=200):
 
                     total_cost = sum([compute_cost(optimal_path[i], optimal_path[i + 1]) for i in range(len(optimal_path) - 1)])
                     print(f"Total cost of path: {total_cost}")
-                    print(optimal_path)
+                    #print(optimal_path)
 
                     break
 
@@ -210,29 +210,42 @@ def is_valid(x, y, obstacle_map):
             obstacle_map[y][x] not in [1, 2])
 
 
-# Creating the Obstacle map
-obstacle_map = ObstacleMap(width, height)
+# flag to break out of the loop
+global interrupted
+interrupted = False
 
-# Taking valid Goal and Start Nodes
-start_coord = input("Enter start coordinates as x,y: ")
-start_x, start_y = start_coord.split(',')
-start_x = int(start_x)
-start_y = int(start_y)
-if is_valid(start_x, start_y, obstacle_map):
-    start = (start_y, start_x)
-else:
-    print("Invalid start node or Node is in Obstacle space")
-    exit(-1)
+# signal handler
+def handler(signum, frame):
+    print("Interrupted!")
+    global interrupted
+    interrupted = True
 
-goal_coordinates = input("Enter goal coordinates as x,y: ")
-goal_x, goal_y = goal_coordinates.split(',')
-goal_x = int(goal_x)
-goal_y = int(goal_y)
-if is_valid(goal_x, goal_y, obstacle_map):
-    goal = (goal_y, goal_x)
-else:
-    print("Invalid goal node or Node is in Obstacle space")
-    exit(-1)
+signal.signal(signal.SIGINT, handler)
 
-# Performing dijkstra and Plotting the optimal path
-path = dijkstra(obstacle_map, start, goal)
+while not interrupted:
+    # Creating the Obstacle map
+    obstacle_map = ObstacleMap(width, height)
+
+    # Taking valid Goal and Start Nodes
+    start_coord = input("Enter start coordinates as x,y: ")
+    start_x, start_y = start_coord.split(',')
+    start_x = int(start_x)
+    start_y = int(start_y)
+    if is_valid(start_x, start_y, obstacle_map):
+        start = (start_y, start_x)
+    else:
+        print("Invalid start node or Node is in Obstacle space")
+        exit(-1)
+
+    goal_coordinates = input("Enter goal coordinates as x,y: ")
+    goal_x, goal_y = goal_coordinates.split(',')
+    goal_x = int(goal_x)
+    goal_y = int(goal_y)
+    if is_valid(goal_x, goal_y, obstacle_map):
+        goal = (goal_y, goal_x)
+    else:
+        print("Invalid goal node or Node is in Obstacle space")
+        exit(-1)
+
+    # Performing dijkstra and Plotting the optimal path
+    path = dijkstra(obstacle_map, start, goal)
