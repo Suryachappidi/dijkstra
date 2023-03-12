@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import heapq
+from matplotlib.animation import FuncAnimation
 
 # Dimensions of the map
 width = 600
@@ -117,6 +120,81 @@ def ObstacleMap(width, height):
 
     return map
 
+def dijkstra(map, start, goal, k=200):
+    height, width = map.shape
+    costs = np.full((height, width), np.inf)
+    visited = np.full((height, width), False)
+    parent_node = np.full((height, width, 2), -1)
+    explored_node = set()
+
+    costs[start[0], start[1]] = 0
+
+    fig, ax = plt.subplots()
+    ax.imshow(map,"PuBu")
+
+    obstacle_map = ax.imshow(map, "PuBu", alpha=0.3)
+    explored_nodes_scatter_plot = ax.scatter([], [], color='y', alpha=0.2, s=10, zorder=1)
+    optimal_path_plot, = ax.plot([], [], color='g', linewidth=2, zorder=2)
+
+    # checking if robot reached goal
+    goal_reached = False
+
+    def update(frame):
+        nonlocal visited, parent_node, explored_node, goal_reached
+        if goal_reached:
+            return explored_nodes_scatter_plot, obstacle_map, optimal_path_plot
+        for i in range(k):
+            if pq:
+                _, current_node = heapq.heappop(pq)
+                if current_node == goal:
+                    goal_reached = True  # set flag to True when goal is reached
+                    optimal_path = backtracking_path(parent_node, start, goal)
+                    x, y = zip(*optimal_path)
+                    explored_nodes_scatter_plot.set_offsets(np.c_[y, x])
+                    optimal_path_plot.set_data(y, x)
+
+                    total_cost = sum([compute_cost(optimal_path[i], optimal_path[i + 1]) for i in range(len(optimal_path) - 1)])
+                    print(f"Total cost of path: {total_cost}")
+                    print(optimal_path)
+
+                    break
+
+                    return explored_nodes_scatter_plot, obstacle_map, optimal_path_plot
+
+                visited[current_node[0], current_node[1]] = True
+                explored_node.add(current_node)
+
+                for neighbour in compute_neighbours(map, current_node):
+                    if not visited[neighbour[0], neighbour[1]]:
+                        cost = costs[current_node[0], current_node[1]] + compute_cost(current_node, neighbour)
+                        if cost < costs[neighbour[0], neighbour[1]]:
+                            costs[neighbour[0], neighbour[1]] = cost
+                            parent_node[neighbour[0], neighbour[1]] = current_node
+                            heapq.heappush(pq, (cost, neighbour))
+
+        x, y = zip(*explored_node)
+        explored_nodes_scatter_plot.set_offsets(np.c_[y, x])
+        return explored_nodes_scatter_plot, obstacle_map, optimal_path_plot
+
+    pq = [(0, start)]
+    animate = FuncAnimation(fig, update, frames=np.arange(50), interval=5, blit=True)
+
+    plt.text(start[1], start[0], 'S', color = 'g')
+    plt.text(goal[1], goal[0], 'G', color = 'r')
+    plt.gca().invert_yaxis()
+    plt.show()
+
+    return None
+
+# returns cost between 2 nodes
+def compute_cost(node1, node2):
+    dx, dy = node2[1] - node1[1], node2[0] - node1[0]
+    if abs(dx) == 1 and abs(dy) == 1:
+        return 1.4
+    else:
+        return 1
+
+# Function to check if input coordinates are valid
 def is_valid(x, y, obstacle_map):
     return (0 <= x < obstacle_map.shape[1] and
             0 <= y < obstacle_map.shape[0] and
@@ -141,8 +219,11 @@ goal_coordinates = input("Enter goal coordinates as x,y: ")
 goal_x, goal_y = goal_coordinates.split(',')
 goal_x = int(goal_x)
 goal_y = int(goal_y)
-if not is_valid(goal_x, goal_y, obstacle_map):
+if is_valid(goal_x, goal_y, obstacle_map):
     goal = (goal_y, goal_x)
 else:
     print("Invalid goal node or Node is in Obstacle space")
     exit(-1)
+
+# Performing dijkstra and Plotting the optimal path
+path = dijkstra(obstacle_map, start, goal)
