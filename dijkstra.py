@@ -1,4 +1,31 @@
 import numpy as np
+
+# return change in x , y and returns cost
+
+def Actionmove_right():
+    return 1, 0, 1
+
+def Actionmove_left():
+    return -1, 0, 1
+
+def Actionmove_up():
+    return 0, 1, 1
+
+def Actionmove_down():
+    return 0, -1, 1
+
+def Actionmove_upright():
+    return 1, 1, 1.4
+
+def Actionmove_upleft():
+    return -1, 1, 1.4
+
+def Actionmove_downright():
+    return 1, -1, 1.4
+
+def Actionmove_downleft():
+    return -1, -1, 1.4
+
 def ObstacleMap(width, height):
     map = np.full((height, width), 0)
     for y in range(height):
@@ -21,7 +48,6 @@ def ObstacleMap(width, height):
             l2_c = (x) - 100
             l3_c = y - 100
             l4_c = y - 150
-
 
             if (l1_c < 0 and l2_c > 0):
                 map[y, x] = 2
