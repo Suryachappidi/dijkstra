@@ -194,6 +194,15 @@ def compute_cost(node1, node2):
     else:
         return 1
 
+# backtracking to start using parent nodes to get optimal path
+def backtracking_path(parents, start, goal):
+    optimal_path = [goal]
+    current_node = goal
+    while not np.array_equal(current_node, start):
+        current_node = parents[current_node[0], current_node[1]]
+        optimal_path.append(current_node)
+    return optimal_path[::-1]
+
 # Function to check if input coordinates are valid
 def is_valid(x, y, obstacle_map):
     return (0 <= x < obstacle_map.shape[1] and
