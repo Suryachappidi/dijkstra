@@ -26,6 +26,19 @@ def Actionmove_downright():
 def Actionmove_downleft():
     return -1, -1, 1.4
 
+# Calculating all possible neighbours for robot using available actions
+
+def compute_neighbours(map, node):
+    width, height = map.shape
+    x, y = node[1], node[0]
+    neighbours = []
+    for dx, dy, cost in [Actionmove_right(), Actionmove_left(), Actionmove_up(), Actionmove_down(), Actionmove_upright(),
+                         Actionmove_upleft(), Actionmove_downright(), Actionmove_downleft()]:
+        new_x, new_y = x + dx, y + dy
+        if 0 <= new_x < height and 0 <= new_y < width and map[new_y, new_x] == 0:
+            neighbours.append((new_y, new_x))
+    return neighbours
+
 def ObstacleMap(width, height):
     map = np.full((height, width), 0)
     for y in range(height):
